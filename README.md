@@ -11,7 +11,7 @@ http://localhost:15672/
 
 # Using in .net
 
-1- install-package rabbitmq.client
+install-package rabbitmq.client for both producer & consumer
 
 # create connection for both producer & consumer
 
@@ -22,8 +22,6 @@ var connection = factory.CreateConnection();
 using var channel = connection.CreateModel();
 
 channel.QueueDeclare("orders");
-
-
 
 # producer : send message
 
