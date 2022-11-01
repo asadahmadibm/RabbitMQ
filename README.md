@@ -5,7 +5,7 @@ RabbitMQ With .NET Core 6 Web API
 
 2- Install RabbitMQ from https://www.rabbitmq.com/download.html
 
-3- Enable in command prompt rabbitmq-plugins enable rabbitmq_management
+3- Enable in command prompt : Go to sbin Directory that RabbitMQ is instsalled & Run rabbitmq-plugins enable rabbitmq_management
 # Managment
 http://localhost:15672/
 
