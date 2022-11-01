@@ -21,7 +21,7 @@ var connection = factory.CreateConnection();
 
 using var channel = connection.CreateModel();
 
-channel.QueueDeclare("orders");
+channel.QueueDeclare("product", exclusive: false);
 
 # producer : send message
 
@@ -29,7 +29,7 @@ var json = JsonConvert.SerializeObject(message);
 
 var body = Encoding.UTF8.GetBytes(json);
 
-channel.BasicPublish(exchange: "", routingKey: "orders", body: body);
+channel.BasicPublish(exchange: "", routingKey: "product", body: body);
 
 # consumer : Recieve message
 
@@ -47,6 +47,6 @@ consumer.Received += (model, eventArgs) =>
 
 };
 
-channel.BasicConsume(queue: "orders", autoAck: true, consumer: consumer);
+channel.BasicConsume(queue: "product", autoAck: true, consumer: consumer);
 
 
