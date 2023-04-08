@@ -9,7 +9,7 @@ RabbitMQ With .NET Core 6 Web API
 # Managment
 http://localhost:15672/
 
-# Using in .net
+# Using in .netsolution 1
 
 install-package rabbitmq.client for both producer & consumer
 
@@ -48,5 +48,99 @@ consumer.Received += (model, eventArgs) =>
 };
 
 channel.BasicConsume(queue: "product", autoAck: true, consumer: consumer);
+
+# Using in .netsolution 2
+
+        MassTransit
+        MassTransit.RabbitMQ
+        MassTransit.AspNetCore
+
+publisher 
+------------------------------------------------------------------------
+in service
+
+     services.AddMassTransit(config =>
+        {
+            config.UsingRabbitMq((ctx, conf) =>
+            {
+                conf.Host(Configuration.GetValue<string>("EventBusSettings:HostAddress"));
+            });
+        });
+
+	services.AddMassTransitHostedService();
+
+in appsettings.json
+
+     "EventBusSettings": {
+        "HostAddress": "amqp://guest:guest@localhost:5672"
+      },
+
+
+
+in class
+
+    private readonly ipublishendpoint _ipe
+    _ipe.publish(message)
+------------------------------------------------------------------------
+
+subscriper
+----------------------------------------------------------------------------
+in service
+
+    services.AddMassTransit(config =>
+        {
+            config.AddConsumer<BasketCheckoutConsumer>();
+
+            config.UsingRabbitMq((ctx, conf) =>
+            {
+                conf.Host(Configuration.GetValue<string>("EventBusSettings:HostAddress"));
+                conf.ReceiveEndpoint(EventBusConstants.BasketCheckoutQueue, c =>
+                {
+                    c.ConfigureConsumer<BasketCheckoutConsumer>(ctx);
+                });
+            });
+        });
+	services.AddMassTransitHostedService();
+	services.AddScoped<BasketCheckoutConsumer>();
+
+in appsettings.json
+
+     "EventBusSettings": {
+        "HostAddress": "amqp://guest:guest@localhost:5672"
+      },
+
+make new class BasketCheckoutConsumer
+
+    public class BasketCheckoutConsumer : IConsumer<BasketCheckoutEvent>
+        {
+            private readonly IMapper _mapper;
+            private readonly IMediator _mediator;
+            private readonly ILogger<BasketCheckoutConsumer> _logger;
+
+            public BasketCheckoutConsumer(IMapper mapper, IMediator mediator, ILogger<BasketCheckoutConsumer> logger)
+            {
+                _mapper = mapper;
+                _mediator = mediator;
+                _logger = logger;
+            }
+
+
+            public async Task Consume(ConsumeContext<BasketCheckoutEvent> context)
+            {
+                var command = _mapper.Map<CheckoutOrderCommand>(context.Message);
+                var result = await _mediator.Send(command);
+                _logger.LogInformation($"order consumed successfully and order id is : {result}");
+            }
+    }
+----------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
 
 
